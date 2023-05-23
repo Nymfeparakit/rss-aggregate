@@ -2,52 +2,51 @@ from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
 from starlette import status
 
 from src.auth import current_user, User
-from src.feeds import schemas
-from src.feeds.schemas import SourceFolderCreate
-from src.feeds.services import get_folders_service, SourceFolderService
+from src.folders import schemas
+from src.folders.schemas import UserFolderCreate
+from src.folders.services import (
+    get_folders_service, UserFolderService,
+)
 
 folders_router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-@folders_router.post("", response_model=schemas.SourceFolder)
+@folders_router.post("", response_model=schemas.UserFolder, status_code=status.HTTP_201_CREATED)
 async def create_folder(
-    folder_create: SourceFolderCreate,
-    folders_service: SourceFolderService = Depends(get_folders_service),
+    folder_create: UserFolderCreate,
+    folders_service: UserFolderService = Depends(get_folders_service),
     user: User = Depends(current_user),
 ):
     return await folders_service.create(folder_create, user)
 
 
-@folders_router.get("", response_model=List[schemas.SourceFolder])
+@folders_router.get("", response_model=List[schemas.UserFolder])
 async def list_folders(
-    folders_service: SourceFolderService = Depends(get_folders_service),
+    folders_service: UserFolderService = Depends(get_folders_service),
     user: User = Depends(current_user),
 ):
     return await folders_service.list(user)
 
 
-@folders_router.get("/{folder_id}", response_model=schemas.SourceFolder)
+@folders_router.get("/{folder_id}", response_model=schemas.UserFolder)
 async def retrieve_folder(
     folder_id: UUID,
     user: User = Depends(current_user),
-    folders_service: SourceFolderService = Depends(get_folders_service),
+    folders_service: UserFolderService = Depends(get_folders_service),
 ):
     folder = await folders_service.retrieve(folder_id, user)
     return folder
 
 
-@folders_router.put("/{folder_id}", response_model=schemas.SourceFolder)
+@folders_router.put("/{folder_id}", response_model=schemas.UserFolder)
 async def update_folder(
     folder_id: UUID,
-    folder_create: SourceFolderCreate,
+    folder_create: UserFolderCreate,
     user: User = Depends(current_user),
-    folders_service: SourceFolderService = Depends(get_folders_service),
+    folders_service: UserFolderService = Depends(get_folders_service),
 ):
     folder = await folders_service.update(folder_id, user, folder_create)
     return folder
@@ -57,6 +56,6 @@ async def update_folder(
 async def delete_folder(
     folder_id: UUID,
     user: User = Depends(current_user),
-    folders_service: SourceFolderService = Depends(get_folders_service)
+    folders_service: UserFolderService = Depends(get_folders_service),
 ):
     await folders_service.delete(folder_id, user)

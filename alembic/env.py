@@ -7,8 +7,9 @@ from alembic import context
 
 from config import SYNC_DATABASE_URL
 from src.database import Base
-from src.feeds.models import Source, SourcesFolder
+from src.folders.models import UserFolder
 from src.auth.models import User
+from src.sources.models import Source
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
