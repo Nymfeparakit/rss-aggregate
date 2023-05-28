@@ -6,7 +6,7 @@ from starlette import status
 
 from src.auth import current_user, User
 from src.folders import schemas
-from src.folders.schemas import UserFolderCreate
+from src.folders.schemas import UserFolderCreate, UserFolderUpdate
 from src.folders.services import (
     get_folders_service, UserFolderService,
 )
@@ -44,7 +44,7 @@ async def retrieve_folder(
 @folders_router.put("/{folder_id}", response_model=schemas.UserFolder)
 async def update_folder(
     folder_id: UUID,
-    folder_create: UserFolderCreate,
+    folder_create: UserFolderUpdate,
     user: User = Depends(current_user),
     folders_service: UserFolderService = Depends(get_folders_service),
 ):

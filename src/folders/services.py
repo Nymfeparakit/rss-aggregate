@@ -3,6 +3,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.auth import User
@@ -13,7 +14,7 @@ from src.folders import schemas, models
 
 class UserFolderService:
     # todo: add typehint
-    def __init__(self, db_session):
+    def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
     async def create(
@@ -25,8 +26,7 @@ class UserFolderService:
 
         return db_folder
 
-    # todo: type hint for return type?
-    async def list(self, user: User):
+    async def list(self, user: User) -> List[models.UserFolder]:
         stmt = select(models.UserFolder).where(models.UserFolder.user_id == user.id)
         result = await self.db_session.execute(stmt)
         return result.scalars().all()
@@ -35,7 +35,7 @@ class UserFolderService:
     async def retrieve(self, folder_id: UUID, user: User) -> models.UserFolder:
         return await self.find(folder_id, user)
 
-    async def update(self, folder_id: UUID, user: User, folder: schemas.UserFolderCreate):
+    async def update(self, folder_id: UUID, user: User, folder: schemas.UserFolderUpdate) -> models.UserFolder:
         instance = await self.find(folder_id, user)
 
         data_to_update = folder.dict()
@@ -45,7 +45,7 @@ class UserFolderService:
 
         return instance
 
-    async def delete(self, folder_id: UUID, user: User):
+    async def delete(self, folder_id: UUID, user: User) -> None:
         instance = await self.find(folder_id, user)
 
         await self.db_session.delete(instance)
@@ -63,5 +63,5 @@ class UserFolderService:
         return instance
 
 
-async def get_folders_service(db_session=Depends(get_async_session)):
+def get_folders_service(db_session=Depends(get_async_session)):
     return UserFolderService(db_session=db_session)
