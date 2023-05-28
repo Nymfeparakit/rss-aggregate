@@ -12,6 +12,10 @@ class UserFolderCreate(UserFolderBase):
     pass
 
 
+class UserFolderUpdate(UserFolderBase):
+    pass
+
+
 class UserFolder(UserFolderBase):
     # todo: how to show id as first field? (how to change order)
     id: Optional[UUID]
