@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from httpx import AsyncClient
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
 from starlette.testclient import TestClient
 

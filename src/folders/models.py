@@ -4,15 +4,7 @@ from sqlalchemy import Column, UUID, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from src.database import Base
-
-
-# todo: use class pattern
-# folder_has_source = Table(
-#     "folder_has_source",
-#     Base.metadata,
-#     Column("folder_id", ForeignKey("source_folder.id")),
-#     Column("source_id", ForeignKey("source.id"))
-# )
+from src.sources.models import Source
 
 
 class FolderHasSourceAssociation(Base):
@@ -20,7 +12,7 @@ class FolderHasSourceAssociation(Base):
     folder_id = Column(ForeignKey("source_folder.id"), primary_key=True)
     source_id = Column(ForeignKey("source.id"), primary_key=True)
     folder = relationship("UserFolder", back_populates="sources")
-    source = relationship("Source", back_populates="folders")
+    source = relationship(Source, back_populates="folders")
 
 
 class UserFolder(Base):
