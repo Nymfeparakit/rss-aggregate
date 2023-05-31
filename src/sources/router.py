@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from starlette import status
 
 from src.auth import User, current_user
-from src.folders.models import FolderHasSourceAssociation
 from src.sources import schemas
 from src.sources.services import SourceService, get_sources_service
 

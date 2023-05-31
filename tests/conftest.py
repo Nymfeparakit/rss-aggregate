@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngin
 from starlette.testclient import TestClient
 
 import config
+from src.folders.models import UserFolder
 from main import app
 from src.auth import current_user, User, UserCreate
 from src.auth.manager import UserManager
@@ -19,7 +20,7 @@ def api_client() -> TestClient:
     return TestClient(app)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def meta_migration():
     # setup
     sync_engine = create_engine(
@@ -44,23 +45,8 @@ async def async_engine() -> AsyncEngine:
     yield engine
 
 
-# async def get_test_session():
-#     test_engine = create_async_engine(
-#         config.MAIN_DATABASE_URL+ '_test',
-#         echo=False,
-#     )
-#
-#     # expire_on_commit=False will prevent attributes from being expired
-#     # after commit.
-#     async_sess = sessionmaker(
-#         test_engine, expire_on_commit=False, class_=AsyncSession
-#     )
-#     async with async_sess() as sess, sess.begin():
-#         yield sess
-
-
 @pytest_asyncio.fixture
-async def session(async_engine):
+async def session(async_engine, meta_migration):
     conn = await async_engine.connect()
     trans = await conn.begin()
     session = AsyncSession(bind=conn, join_transaction_mode="create_savepoint", expire_on_commit=False)
@@ -70,15 +56,6 @@ async def session(async_engine):
     await session.close()
     await trans.rollback()
     await conn.close()
-
-
-@pytest_asyncio.fixture
-async def source(session):
-    source = Source(name="some name", url="some url")
-    session.add(source)
-    await session.commit()
-
-    yield source
 
 
 @pytest_asyncio.fixture
@@ -95,12 +72,6 @@ async def user_test(user_db) -> User:
     return user
 
 
-# @pytest_asyncio.fixture
-# async def session2(session):
-#     async with async_session() as sess, sess.begin():
-#         yield sess
-
-
 @pytest_asyncio.fixture
 async def override_app_client(user_test, session):
     def get_sess():
@@ -114,3 +85,21 @@ async def override_app_client(user_test, session):
 
     del app.dependency_overrides[current_user]
     del app.dependency_overrides[get_async_session]
+
+
+@pytest_asyncio.fixture
+async def source(session) -> Source:
+    created_source = Source(name="some name", url="some url")
+    session.add(created_source)
+    await session.commit()
+
+    yield created_source
+
+
+@pytest_asyncio.fixture
+async def folder(session, user_test) -> UserFolder:
+    created_folder = UserFolder(name="some name", user=user_test)
+    session.add(created_folder)
+    await session.commit()
+
+    yield created_folder
