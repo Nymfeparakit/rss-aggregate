@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, HttpUrl
@@ -13,6 +14,8 @@ class SourceCreate(SourceBase):
 
 
 class Source(SourceBase):
+    id: Optional[UUID]
+
     class Config:
         orm_mode = True
 
