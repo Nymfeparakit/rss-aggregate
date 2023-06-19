@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.config import SYNC_DATABASE_URL
+from src.config import global_settings
 from src.database import Base
 
 # this is the Alembic Config object, which provides
@@ -13,7 +13,7 @@ from src.database import Base
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, "SYNC_DATABASE_URL", SYNC_DATABASE_URL)
+config.set_section_option(section, "SYNC_DATABASE_URL", global_settings.sync_db_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
