@@ -21,7 +21,7 @@ services:
   nginx:
     build: ./deploy/nginx
     ports:
-      -  1337:80
+      -  80:80
     depends_on:
       -  web
 volumes:
