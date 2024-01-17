@@ -10,6 +10,7 @@ from src.folders.schemas import UserFolderCreate, UserFolderUpdate
 from src.folders.services import (
     get_folders_service, UserFolderService,
 )
+from src.sources.schemas import SourceCreate, Source
 
 folders_router = APIRouter()
 
@@ -59,3 +60,13 @@ async def delete_folder(
     folders_service: UserFolderService = Depends(get_folders_service),
 ):
     await folders_service.delete(folder_id, user)
+
+
+@folders_router.post("/{folder_id}/sources", response_model=Source)
+async def create_folder_source(
+        folder_id: UUID,
+        source: SourceCreate,
+        user: User = Depends(current_user),
+        folders_service: UserFolderService = Depends(get_folders_service),
+):
+    return await folders_service.create_folder_source(folder_id, user, source)

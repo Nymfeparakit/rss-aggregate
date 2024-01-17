@@ -1,21 +1,29 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import Depends
+import aiohttp
+import feedparser
+from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from starlette import status
 
 from src.auth import User
 from src.database import get_async_session
 from src.exceptions import NotFoundHTTPException
 from src.folders import schemas, models
+from src.rss.exceptions import InvalidRSSURL
+from src.rss.parsers import RSSFeedParser, RSSElementsParser
+from src.sources.models import Source
+from src.sources.schemas import SourceCreate
 
 
 class UserFolderService:
     # todo: add typehint
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
+        self.url_parser = RSSFeedParser()
 
     async def create(
         self, folder: schemas.UserFolderCreate, user: User
@@ -61,6 +69,29 @@ class UserFolderService:
         if instance is None:
             raise NotFoundHTTPException
         return instance
+
+    async def create_folder_source(self, folder_id: UUID, user: User, source_schema_obj: SourceCreate):
+        try:
+            folder = await self.find(folder_id, user)
+
+            # check if passed url is valid
+            parsed_data = await self.url_parser.try_parse_rss(source_schema_obj.url)
+
+            # todo: upload rss icon if it has link to it
+            file_name = await RSSElementsParser().save_feed_image(parsed_data)
+            source_data = dict(**source_schema_obj.dict(), folder_id=folder.id)
+            if file_name:
+                source_data.update(icon=file_name)
+            source_obj = Source(**source_data)
+
+            self.db_session.add(source_obj)
+            await self.db_session.commit()
+
+            return source_obj
+        except InvalidRSSURL:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Passed url does not contain valid rss data"
+            )
 
 
 def get_folders_service(db_session=Depends(get_async_session)):

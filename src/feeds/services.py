@@ -1,6 +1,5 @@
 import asyncio
-from datetime import datetime, timezone, timedelta
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, List
 
 import feedparser
 from aiohttp import ClientSession, ClientTimeout
@@ -10,53 +9,8 @@ from loguru import logger
 from src.auth import User
 from src.feeds.exceptions import CanNotFetchRSSByURL
 from src.feeds.schemas import Article
+from src.rss.parsers import ArticlesParser
 from src.sources.services import get_sources_service, SourceService
-
-
-class ArticlesParser:
-    PUBLISHED_DATETIME_FORMAT = "%a, %d %b %Y %H:%M:%S %z"
-
-    def find_last_article(self, parsed_rss_data: Dict[str, Any]) -> Optional[Article]:
-        # get latest article in last 10 hours
-        try:
-            entries = parsed_rss_data["entries"]
-
-            # if there is a published date in entries, sort them by this dates
-            entries_have_date = False
-            if entries[0].get("published"):
-                entries_have_date = True
-
-            if entries_have_date:
-                entries = sorted(
-                    entries,
-                    key=self._get_entry_datetime,
-                    reverse=True,
-                )
-
-            # get first entry and return its data
-            first_entry = entries[0]
-            if entries_have_date:
-                # check that the article was published no more than 10 hours ago
-                h_10_ago = datetime.now(timezone.utc) - timedelta(hours=10)
-                article_published_dt = self._get_entry_datetime(first_entry)
-                if article_published_dt < h_10_ago:
-                    return None
-
-            last_article = Article(
-                title=first_entry["title"],
-                summary=first_entry["summary"],
-                link=first_entry["link"],
-            )
-
-            return last_article
-
-        except KeyError:
-            logger.error("Failed to find last article, data parsing error")
-
-    def _get_entry_datetime(self, entry: Dict[str, Any]) -> datetime:
-        return datetime.strptime(
-            entry["published"], self.PUBLISHED_DATETIME_FORMAT
-        )
 
 
 async def fetch_data_by_url(session: ClientSession, url: str) -> Dict[str, Any]:

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Settings</h1>
+    <br/>
+    {% if sources %}
+    {% for source in sources %}
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img src="..." class="img-fluid rounded-start" alt="...">
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="{{source.url}}">{{ source.name }}</a><br/>
+        <br/><br/>
+    {% endfor %}
+    {% endif %}
+{% endblock %}

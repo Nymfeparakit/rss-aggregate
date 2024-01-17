@@ -18,11 +18,3 @@ class Source(SourceBase):
 
     class Config:
         orm_mode = True
-
-
-class FolderItem(BaseModel):
-    source_id: UUID
-    folder_id: UUID
-
-    class Config:
-        orm_mode = True
