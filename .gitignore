@@ -56,3 +56,5 @@ __pypackages__/
 venv/
 
 .idea/
+
+media/

@@ -4,7 +4,9 @@ services:
   web:
     build: .
     ports:
-      -  "8000:8000"
+      -  "8002:8002"
+    volumes:
+      - rss-agg-media-data:/code/media
     depends_on:
       -  db
   db:
@@ -20,4 +22,6 @@ services:
       -  rss-agg-db-data:/var/lib/postgresql/data
 volumes:
   rss-agg-db-data:
+    driver: local
+  rss-agg-media-data:
     driver: local

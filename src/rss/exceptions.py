@@ -1,0 +1,2 @@
+class InvalidRSSURL(Exception):
+    pass
