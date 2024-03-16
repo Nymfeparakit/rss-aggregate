@@ -5,8 +5,8 @@ from pydantic import BaseSettings, PostgresDsn
 
 load_dotenv()
 
-
-DEFAULT_ICON_NAME = "default-icon.jpg"
+# todo: move it to env
+DEFAULT_ICON_NAME = "default-icon.png"
 
 
 class Settings(BaseSettings):

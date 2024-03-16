@@ -14,7 +14,7 @@ from src.database import get_async_session
 from src.exceptions import NotFoundHTTPException
 from src.folders import schemas, models
 from src.rss.exceptions import InvalidRSSURL
-from src.rss.parsers import RSSFeedParser, RSSElementsParser
+from src.rss.parsers import RSSFeedParser, ImageSavingService
 from src.sources.models import Source
 from src.sources.schemas import SourceCreate
 
@@ -78,7 +78,11 @@ class UserFolderService:
             parsed_data = await self.url_parser.try_parse_rss(source_schema_obj.url)
 
             # todo: upload rss icon if it has link to it
-            file_name = await RSSElementsParser().save_feed_image(parsed_data)
+            file_name = None
+            if hasattr(parsed_data.feed, "image"):
+                file_name = await ImageSavingService().save_image(
+                    parsed_rss_data=parsed_data, folder_name=str(user.id), file_name=source_schema_obj.name
+                )
             source_data = dict(**source_schema_obj.dict(), folder_id=folder.id)
             if file_name:
                 source_data.update(icon=file_name)
