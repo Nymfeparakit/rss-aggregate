@@ -18,7 +18,7 @@ class SourceService(BaseModelService):
         super().__init__(db_session)
 
     async def find_sources_by_user(self, user: User):
-        stmt = select(models.Source.id, models.Source.name, models.Source.url).join(UserFolder).where(UserFolder.user_id == user.id)
+        stmt = select(models.Source.id, models.Source.name, models.Source.url, models.Source.icon).join(UserFolder).where(UserFolder.user_id == user.id)
         results = await self.db_session.execute(stmt)
         return results.all()
 

@@ -14,6 +14,7 @@ class SourceCreate(SourceBase):
 
 
 class Source(SourceBase):
+    icon: str
     id: Optional[UUID]
 
     class Config:

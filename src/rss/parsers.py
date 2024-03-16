@@ -80,24 +80,28 @@ class RSSFeedParser:
         return parsed_data
 
 
-class RSSElementsParser:
-    async def save_feed_image(self, parsed_rss_data: FeedParserDict) -> Optional[str]:
+class CanNotFetchImage(Exception):
+    pass
+
+
+class ImageSavingService:
+    async def save_image(self, parsed_rss_data: FeedParserDict, folder_name: str, file_name: str) -> str:
         print("trying to save an image")
         image_data = parsed_rss_data.feed.image
         async with aiohttp.ClientSession() as session:
             async with session.get(image_data.href) as resp:
                 if resp.status != status.HTTP_200_OK:
-                    return None
+                    raise CanNotFetchImage
 
                 print("got response successfully")
-                folder_name = uuid.uuid4()
-                feed_dir_path = os.path.join(global_settings.base_dir, global_settings.icons_path, str(folder_name))
+                feed_dir_path = os.path.join(global_settings.icons_path, folder_name)
                 dir_exists = os.path.exists(feed_dir_path)
                 if not dir_exists:
                     os.makedirs(feed_dir_path)
-                file_name = os.path.join(feed_dir_path, "feed_logo")
-                print(f"will save image at: {file_name}")
-                async with aiofiles.open(file_name, mode='wb') as f:
+                file_path = os.path.join(feed_dir_path, file_name)
+                # todo: продумать логику на случай файлов с одинаковыми именами
+                print(f"will save image at: {file_path}")
+                async with aiofiles.open(file_path, mode='wb') as f:
                     await f.write(await resp.read())
 
-                return file_name
+        return os.path.join(folder_name, file_name)
